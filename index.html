@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xalio&#39;s Noat Boat - Published Notes</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%B3%3C/text%3E%3C/svg%3E">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background-color: #1a1a1a;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 24px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 24px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 120px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 120px);
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; flex: 1; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .boat-container {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 14px; line-height: 1.1; white-space: pre; margin: 20px auto; color: #999;
+    }
+    h1 { font-size: 28px; margin-top: 20px; font-weight: 700; }
+    .subtitle { color: #999; font-size: 14px; margin-top: 8px; }
+    .webring-buttons { display: flex; justify-content: center; gap: 24px; margin-top: 16px; flex-wrap: wrap; }
+    .webring-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 12px 16px; border-radius: 10px; text-decoration: none;
+      background: transparent; border: none;
+      transition: all 0.15s ease; cursor: pointer; min-width: 140px;
+    }
+    .webring-btn:hover { transform: translateY(-2px); }
+    .webring-btn img { width: 48px; height: 48px; object-fit: contain; }
+    .webring-btn span { font-size: 12px; color: #999; font-weight: 500; }
+    .tip-modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;
+    }
+    .tip-modal-overlay.open { display: flex; }
+    .tip-modal {
+      background: #252525; border-radius: 12px; padding: 24px; max-width: 420px; width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 1px solid #3a3a3a; max-height: 85vh; overflow-y: auto;
+    }
+    .tip-modal h2 { margin: 0 0 16px 0; font-size: 20px; text-align: center; }
+    .tip-modal-close {
+      position: absolute; top: 12px; right: 12px; background: none; border: none;
+      font-size: 20px; cursor: pointer; color: #999; padding: 4px 8px;
+    }
+    .tip-modal-close:hover { color: #e0e0e0; }
+    .tip-section { margin-bottom: 16px; padding: 14px; background: #1a1a1a; border-radius: 8px; border: 1px solid #3a3a3a; }
+    .tip-section:last-child { margin-bottom: 0; }
+    .tip-link {
+      display: block; text-align: center; padding: 10px 16px; background: #6ba3ff;
+      color: white; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;
+      margin-bottom: 10px; transition: opacity 0.15s;
+    }
+    .tip-link:hover { opacity: 0.85; }
+    .tip-link.btc { background: #f7931a; }
+    .tip-link.eth { background: #627eea; }
+    .tip-address {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 10px; word-break: break-all; padding: 8px; background: #252525;
+      border: 1px solid #3a3a3a; border-radius: 4px; user-select: all; cursor: text; text-align: center;
+    }
+    .notes-list { background: #252525; border: 1px solid #3a3a3a; border-radius: 12px; overflow: hidden; }
+    .note-link {
+      display: block; padding: 16px 20px; text-decoration: none; color: #e0e0e0;
+      border-bottom: 1px solid #3a3a3a; transition: background 0.15s ease;
+    }
+    .note-link:last-child { border-bottom: none; }
+    .note-link:hover { background: #2d2d2d; }
+    .note-title { font-size: 16px; font-weight: 600; color: #6ba3ff; }
+    .note-meta { font-size: 12px; color: #999; margin-top: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #999; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <pre class="boat-container" id="asciiBoat">   .  o ..                  
+     o . o o.o                
+          ...oo               
+            __[]__            
+         __|_o_o_o\\__         
+         \\"""""""""\"/         
+          \\. ..  . /          
+     ^^^^^^^^^^^^^^^^^^^^</pre>
+      <h1>Xalio's Noat Boat</h1>
+      <div class="webring-buttons">
+        <a href="#" class="webring-btn" id="tipBtn" title="Tip this Boat!">
+          <img src="https://noatboatwebring.netlify.app/tip.png" alt="Tip">
+          <span>Tip this Boat!</span>
+        </a>
+        <a href="#" class="webring-btn" id="ahoyBtn" title="Ahoy!">
+          <img src="https://noatboatwebring.netlify.app/msg.png" alt="Ahoy">
+          <span>Ahoy!</span>
+        </a>
+        <a href="#" class="webring-btn" id="boardBtn" title="Board another Boat!">
+          <img src="https://noatboatwebring.netlify.app/board.png" alt="Board">
+          <span>Board another Boat!</span>
+        </a>
+      </div>
+    </div>
+    <div class="notes-list" id="notesList">
+      
+      <a href="./xalio-was-here!/index.html" class="note-link">
+        <div class="note-title">Xalio Was Here!</div>
+        <div class="note-meta">1/25/2026</div>
+      </a><!-- NOTE_LINKS_PLACEHOLDER -->
+    </div>
+  </div>
+  <div class="footer">Made with Noat Boat</div>
+  
+  <!-- Tip Modal -->
+  <div class="tip-modal-overlay" id="tipModal">
+    <div class="tip-modal" style="position:relative;">
+      <button class="tip-modal-close" id="tipModalClose">&times;</button>
+      <h2>Tip this Boat!</h2>
+      <div id="tipContent"></div>
+    </div>
+  </div>
+  
+  <script>
+    // Tip addresses (embedded during export)
+    var TIP_BTC_ADDRESS = '194mLBzSKZLKsrY6wPPHBvPveNH5NV8H9U';
+    var TIP_ETH_ADDRESS = '';
+    
+    (function() {
+      var boatEl = document.getElementById('asciiBoat');
+      if (!boatEl) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      var base = boatEl.textContent.replace(/\r/g, '');
+      var lines = base.split('\n');
+      var wavePattern = '^_^^^-^^_^^^^-^^^-^';
+
+      var runsByLine = lines.map(function(line) {
+        var runs = [];
+        var re = /\^+/g;
+        var m;
+        while ((m = re.exec(line)) !== null) {
+          runs.push({ start: m.index, len: m[0].length });
+        }
+        return runs;
+      });
+
+      var stackRow = lines.findIndex(function(l) { return l.indexOf('[]') !== -1; });
+      var stackCol = stackRow >= 0 ? lines[stackRow].indexOf('[') : 0;
+      var smokeRowCount = 3;
+      var maxSmokeWidth = 18;
+      var smokeWidth = Math.min(maxSmokeWidth, Math.max(8, stackCol));
+      var smokeRows = [];
+      var smokeStart = Math.max(0, Math.min(Math.max(0, stackCol - 1), stackCol - smokeWidth + 3));
+
+      function extractRegion(line, start, len) {
+        var s = String(line || '').padEnd ? String(line || '').padEnd(start + len, ' ') : String(line || '') + Array(start + len).join(' ');
+        return s.slice(start, start + len);
+      }
+
+      function overlay(line, start, text) {
+        var need = start + text.length;
+        var padded = String(line || '').padEnd ? String(line || '').padEnd(need, ' ') : String(line || '') + Array(need).join(' ');
+        var chars = padded.split('');
+        for (var i = 0; i < text.length; i++) chars[start + i] = text[i];
+        return chars.join('');
+      }
+
+      function clearFromCol(line, col) {
+        var chars = String(line || '').split('');
+        for (var i = col; i < chars.length; i++) {
+          if (chars[i] === 'o' || chars[i] === '.') chars[i] = ' ';
+        }
+        return chars.join('');
+      }
+
+      var seed = 123456789;
+      function rand() {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        return seed / 4294967296;
+      }
+
+      function driftAndFadeRow(row) {
+        var shifted = row.slice(1) + ' ';
+        var chars = shifted.split('');
+        for (var i = 0; i < chars.length; i++) {
+          var c = chars[i];
+          if (c === 'o' && rand() < 0.30) chars[i] = '.';
+          else if (c === '.' && rand() < 0.22) chars[i] = ' ';
+        }
+        return chars.join('');
+      }
+
+      function makeSeedRow() {
+        var chars = Array(smokeWidth).fill ? Array(smokeWidth).fill(' ') : [];
+        if (!chars.fill) for (var i = 0; i < smokeWidth; i++) chars.push(' ');
+        var origin = Math.max(0, smokeWidth - 3);
+        var count = 3 + Math.floor(rand() * 4);
+        for (var i = 0; i < count; i++) {
+          var driftLeft = Math.floor(rand() * 10);
+          var pos = Math.max(0, origin - driftLeft);
+          var far = (origin - pos) >= 5;
+          chars[pos] = rand() < (far ? 0.20 : 0.55) ? 'o' : '.';
+        }
+        if (rand() < 0.55) {
+          var pos = Math.max(0, origin - (8 + Math.floor(rand() * 8)));
+          if (pos < smokeWidth && chars[pos] === ' ') chars[pos] = '.';
+        }
+        if (rand() < 0.30) {
+          var pos = Math.max(0, origin - (10 + Math.floor(rand() * 6)));
+          if (pos < smokeWidth && chars[pos] === ' ') chars[pos] = '.';
+        }
+        return chars.join('');
+      }
+
+      var smokeBuf = [];
+      if (stackRow >= 0) {
+        for (var r = Math.max(0, stackRow - smokeRowCount); r < stackRow; r++) {
+          smokeRows.push(r);
+        }
+        smokeBuf = smokeRows.map(function(r) { return extractRegion(lines[r], smokeStart, smokeWidth); });
+
+        for (var j = 0; j < smokeRows.length; j++) {
+          var row = smokeRows[j];
+          var line = String(lines[row] || '');
+          var chars = smokeBuf[j].split('');
+          var insertPos = smokeWidth - 1;
+          for (var c = stackCol; c < line.length; c++) {
+            var ch = line[c];
+            if (ch === 'o' || ch === '.') {
+              while (insertPos >= 0 && chars[insertPos] === 'o') insertPos--;
+              if (insertPos >= 0) { chars[insertPos] = ch; insertPos--; }
+            }
+          }
+          smokeBuf[j] = chars.join('');
+        }
+      }
+
+      var offset = 0;
+      var smokeTick = 0;
+      var intervalMs = 140;
+
+      setInterval(function() {
+        offset = (offset + 1) % wavePattern.length;
+        smokeTick++;
+
+        if (smokeRows.length) {
+          smokeBuf = smokeBuf.map(driftAndFadeRow);
+          if (smokeTick % 2 === 0) {
+            smokeBuf = smokeBuf.slice(1).concat([makeSeedRow()]);
+          }
+        }
+
+        var out = lines.map(function(line, i) {
+          var runs = runsByLine[i];
+          if (!runs || runs.length === 0) return line;
+          var chars = line.split('');
+          for (var j = 0; j < runs.length; j++) {
+            var r = runs[j];
+            var need = r.len;
+            var repeatCount = Math.ceil((need + offset) / wavePattern.length) + 2;
+            var seq = '';
+            for (var x = 0; x < repeatCount; x++) seq += wavePattern;
+            seq = seq.slice(offset, offset + need);
+            for (var k = 0; k < need; k++) chars[r.start + k] = seq[k];
+          }
+          return chars.join('');
+        });
+
+        if (smokeRows.length && stackCol > 0) {
+          for (var j = 0; j < smokeRows.length; j++) {
+            var row = smokeRows[j];
+            out[row] = clearFromCol(out[row], stackCol);
+          }
+        }
+
+        if (smokeRows.length) {
+          for (var j = 0; j < smokeRows.length; j++) {
+            var row = smokeRows[j];
+            out[row] = overlay(out[row], smokeStart, smokeBuf[j]);
+          }
+        }
+
+        boatEl.textContent = out.join('\n');
+      }, intervalMs);
+    })();
+
+    // Webring button handlers
+    (function() {
+      var boardBtn = document.getElementById('boardBtn');
+      if (boardBtn) {
+        boardBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          var currentUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+          fetch('https://noatboatwebring.netlify.app/.netlify/functions/webring?action=random&exclude=' + encodeURIComponent(currentUrl))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              if (data.url) {
+                window.location.href = data.url;
+              } else {
+                alert('No other boats in the webring yet!');
+              }
+            })
+            .catch(function() {
+              alert('Could not reach the webring. Try again later!');
+            });
+        });
+      }
+      
+      var tipBtn = document.getElementById('tipBtn');
+      var tipModal = document.getElementById('tipModal');
+      var tipModalClose = document.getElementById('tipModalClose');
+      var tipContent = document.getElementById('tipContent');
+      
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+          alert('Address copied!');
+        }).catch(function() {
+          // Fallback for older browsers
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          alert('Address copied!');
+        });
+      }
+      
+      function openTipModal() {
+        if (!TIP_BTC_ADDRESS && !TIP_ETH_ADDRESS) {
+          alert('No tip addresses configured for this boat.');
+          return;
+        }
+        
+        var html = '';
+        
+        // Bitcoin section
+        if (TIP_BTC_ADDRESS) {
+          html += '<div class="tip-section">';
+          html += '<a href="bitcoin:' + TIP_BTC_ADDRESS + '" class="tip-link btc" id="btcTipBtn">Tip with Bitcoin</a>';
+          html += '<div class="tip-address">' + TIP_BTC_ADDRESS + '</div>';
+          html += '</div>';
+        }
+        
+        // Ethereum section
+        if (TIP_ETH_ADDRESS) {
+          html += '<div class="tip-section">';
+          html += '<a href="#" class="tip-link eth" id="ethTipBtn">Tip with ETH</a>';
+          html += '<div class="tip-address">' + TIP_ETH_ADDRESS + '</div>';
+          html += '</div>';
+        }
+        
+        tipContent.innerHTML = html;
+        tipModal.classList.add('open');
+        
+        // Add click handlers for copying
+        var btcTipBtn = document.getElementById('btcTipBtn');
+        if (btcTipBtn) {
+          btcTipBtn.addEventListener('click', function() {
+            copyToClipboard(TIP_BTC_ADDRESS);
+          });
+        }
+        
+        var ethTipBtn = document.getElementById('ethTipBtn');
+        if (ethTipBtn) {
+          ethTipBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            copyToClipboard(TIP_ETH_ADDRESS);
+          });
+        }
+      }
+      
+      function closeTipModal() {
+        tipModal.classList.remove('open');
+      }
+      
+      if (tipBtn) {
+        tipBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          openTipModal();
+        });
+      }
+      
+      if (tipModalClose) {
+        tipModalClose.addEventListener('click', closeTipModal);
+      }
+      
+      if (tipModal) {
+        tipModal.addEventListener('click', function(e) {
+          if (e.target === tipModal) closeTipModal();
+        });
+      }
+      
+      // Ahoy button handler
+      var ahoyBtn = document.getElementById('ahoyBtn');
+      if (ahoyBtn) {
+        ahoyBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          // Check if there's a link to /ahoy in the page
+          var ahoyLink = document.querySelector('a[href*="/ahoy"]');
+          if (ahoyLink) {
+            window.location.href = ahoyLink.href;
+          } else {
+            alert('This boat does not answer your call.');
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
