@@ -63,7 +63,7 @@
     }
     #canvasContainer canvas { display: block; }
     #canvasContainer .canvas-container { position: absolute !important; }
-    .audio-player { padding: 10px; border-top: 1px solid #3a3a3a; display: none; flex-shrink: 0; }
+    .audio-player { padding: 10px; border-top: 1px solid #3a3a3a; display: block; flex-shrink: 0; }
     .audio-player audio { width: 100%; }
     @media (max-width: 768px) { .main { flex-direction: column; } .editor-pane, .canvas-pane { flex: none; height: 45vh; } }
   </style>
@@ -107,7 +107,7 @@
       <div id="canvasContainer">
         <canvas id="fabricCanvas"></canvas>
       </div>
-      <div class="audio-player"><audio controls loop src=""></audio></div>
+      <div class="audio-player"><audio controls loop src="audio.mp3"></audio></div>
     </div>
   </div>
   <script>
