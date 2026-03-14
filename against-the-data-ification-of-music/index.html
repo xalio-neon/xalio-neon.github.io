@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Against the data-ification of music - Xalio's Noat Boat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background-color: #1a1a1a; 
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 24px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 24px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 120px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 120px);
+      color: #e0e0e0; 
+      height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    .topbar { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #3a3a3a; background: #252525; gap: 12px; }
+    .back-btn { padding: 6px 12px; border: 1px solid #3a3a3a; background: #252525; border-radius: 6px; cursor: pointer; font-size: 13px; color: #e0e0e0; text-decoration: none; }
+    .title { font-size: 16px; font-weight: 700; font-family: monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .save-status { font-size: 12px; color: #999; font-family: monospace; }
+    .main { display: flex; flex: 1; overflow: hidden; gap: 16px; padding: 14px; min-height: 0; }
+    .editor-pane { flex: 1; display: flex; flex-direction: column; min-width: 200px; min-height: 0; }
+    textarea { 
+      flex: 1; 
+      border: 1px solid #3a3a3a; 
+      border-radius: 12px; 
+      resize: none; 
+      padding: 14px; 
+      font-size: 14px; 
+      line-height: 1.55; 
+      font-family: monospace; 
+      background-color: #1e1e1e; 
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 24px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 24px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 120px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent 120px);
+      background-attachment: local;
+      color: #e0e0e0; 
+      outline: none; 
+    }
+    .canvas-pane { flex: 1; display: none; flex-direction: column; min-width: 200px; min-height: 0; border: 1px solid #3a3a3a; border-radius: 12px; overflow: hidden; background: #1e1e1e; }
+    .canvas-toolbar { display: flex; gap: 6px; padding: 8px 10px; border-bottom: 1px solid #3a3a3a; background: #252525; flex-shrink: 0; }
+    .btn { padding: 5px 10px; border: 1px solid #3a3a3a; background: #252525; border-radius: 6px; cursor: pointer; font-size: 12px; color: #e0e0e0; }
+    .btn.active { background: #1e3a5f; border-color: #2d5a8a; }
+    #canvasContainer { 
+      flex: 1; 
+      position: relative; 
+      overflow: hidden; 
+      min-height: 0;
+      background-color: #1e1e1e;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0, rgba(255,255,255,.02) 1px, transparent 1px, transparent 24px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0, rgba(255,255,255,.02) 1px, transparent 1px, transparent 24px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0, rgba(255,255,255,.04) 1px, transparent 1px, transparent 120px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0, rgba(255,255,255,.04) 1px, transparent 1px, transparent 120px);
+    }
+    #canvasContainer canvas { display: block; }
+    #canvasContainer .canvas-container { position: absolute !important; }
+    .audio-player { padding: 10px; border-top: 1px solid #3a3a3a; display: none; flex-shrink: 0; }
+    .audio-player audio { width: 100%; }
+    @media (max-width: 768px) { .main { flex-direction: column; } .editor-pane, .canvas-pane { flex: none; height: 45vh; } }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="../index.html" class="back-btn">Back</a>
+    <div class="title">Against the data-ification of music</div>
+    <div class="save-status" id="saveStatus"></div>
+  </div>
+  <div class="main">
+    <div class="editor-pane">
+      <textarea id="editor" spellcheck="false">-o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o-
+
+From time to time I take a walk from my distant neon house and cross the information superhighway: I use Youtube mostly for music, but the overall aura that lingers is much different to when Youtube was young (and so was I) - I see stuff being called &quot;content&quot;... I see numbers, algorithms, ai- i am an anspiring musician wanting to expeirence music, but i end up feeling like im the sales manager of some company- NUMBERS EVERYWHERe!
+This is among many other things the difference i notice with the old internet, which was much more sincere, innocent in a way, and damn, i must not be the only one feeling this way
+The rise of that nostalgia for old technology, Vaporwave, Neocities, stuff like that I feel, beyond the generic nostalgia of &quot;old times were better&quot;, it just shows that we desire to escape the corporate and number-dominated Internet life we are living through right now!
+
+I am one to say it: I am against the data-ification of music! This beautiful art, that exists through waves passing our body and heart through time, for me, is not and never will be a game of numbers, algorithms or shitty AI to decide what value it has. i always support unknown musicians , and look for small groups online too and say the same, we cannot let views or algos tell us that our stuff is &quot;less better&quot; because a randomized system gave another person&#39;s 1 million views. great music is to be savored slowly, with repeated listens, and NOT a competition! well, sorry, i am deeply passionate about music, and for that I will always fight fot the value of real, sincere music being shared online
+
+-o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o--o-</textarea>
+    </div>
+    <div class="canvas-pane" id="canvasPane">
+      <div class="canvas-toolbar">
+        <button id="selectBtn" class="btn active">Select</button>
+        <button id="drawBtn" class="btn">Draw</button>
+      </div>
+      <div id="canvasContainer">
+        <canvas id="fabricCanvas"></canvas>
+      </div>
+      <div class="audio-player"><audio controls loop src=""></audio></div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var STORAGE_KEY = 'noatboat_' + "against-the-data-ification-of-music";
+      var canvasJson = null;
+      var canvasImage = null;
+      var fallbackImage = null;
+      var fabricCanvas = null, saveTimer = null;
+      
+      var editor = document.getElementById('editor');
+      var saveStatus = document.getElementById('saveStatus');
+      
+      try { var saved = localStorage.getItem(STORAGE_KEY); if (saved) { var data = JSON.parse(saved); if (data.content) editor.value = data.content; } } catch(e){}
+      
+      function scheduleSave() {
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(function() {
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ content: editor.value })); saveStatus.textContent = 'saved'; } catch(e){}
+        }, 1000);
+      }
+      editor.addEventListener('input', function() { saveStatus.textContent = 'modified'; scheduleSave(); });
+      
+      function fitCanvasViewport(padding) {
+        padding = padding || 24;
+        if (!fabricCanvas) return;
+
+        var objects = fabricCanvas.getObjects();
+        if (!objects || objects.length === 0) {
+          fabricCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+          fabricCanvas.requestRenderAll();
+          return;
+        }
+
+        // Compute overall bounds in canvas coords
+        var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (var i = 0; i < objects.length; i++) {
+          var r = objects[i].getBoundingRect(true, true);
+          minX = Math.min(minX, r.left);
+          minY = Math.min(minY, r.top);
+          maxX = Math.max(maxX, r.left + r.width);
+          maxY = Math.max(maxY, r.top + r.height);
+        }
+
+        var contentW = Math.max(1, maxX - minX);
+        var contentH = Math.max(1, maxY - minY);
+
+        var cw = fabricCanvas.getWidth();
+        var ch = fabricCanvas.getHeight();
+
+        var availW = Math.max(1, cw - padding * 2);
+        var availH = Math.max(1, ch - padding * 2);
+
+        var scale = Math.min(availW / contentW, availH / contentH);
+
+        // Center content
+        var contentCx = minX + contentW / 2;
+        var contentCy = minY + contentH / 2;
+        var tx = (cw / 2) - (contentCx * scale);
+        var ty = (ch / 2) - (contentCy * scale);
+
+        fabricCanvas.setViewportTransform([scale, 0, 0, scale, tx, ty]);
+        fabricCanvas.requestRenderAll();
+      }
+      
+      function initCanvas() {
+        var container = document.getElementById('canvasContainer');
+        var rect = container.getBoundingClientRect();
+        
+        var width = Math.max(Math.floor(rect.width), 400);
+        var height = Math.max(Math.floor(rect.height), 300);
+        
+        fabricCanvas = new fabric.Canvas('fabricCanvas', {
+          width: width,
+          height: height,
+          backgroundColor: null,
+          selection: true,
+          preserveObjectStacking: true
+        });
+        
+        fabricCanvas.freeDrawingBrush.width = 3;
+        fabricCanvas.freeDrawingBrush.color = '#000000';
+        
+        if (canvasJson) {
+          fabricCanvas.loadFromJSON(canvasJson, function() {
+            fitCanvasViewport();
+            fabricCanvas.renderAll();
+          });
+        } else if (canvasImage || fallbackImage) {
+          fabric.Image.fromURL(canvasImage || fallbackImage, function(img) {
+            if (!img) return;
+            
+            var canvasWidth = fabricCanvas.width;
+            var canvasHeight = fabricCanvas.height;
+            
+            // Scale image to fit within canvas with padding
+            var maxWidth = canvasWidth * 0.9;
+            var maxHeight = canvasHeight * 0.9;
+            
+            var scale = 1;
+            if (img.width > maxWidth || img.height > maxHeight) {
+              scale = Math.min(maxWidth / img.width, maxHeight / img.height);
+            }
+            
+            img.scale(scale);
+            img.set({
+              left: (canvasWidth - img.getScaledWidth()) / 2,
+              top: (canvasHeight - img.getScaledHeight()) / 2,
+              selectable: true
+            });
+            
+            fabricCanvas.add(img);
+            fabricCanvas.renderAll();
+          }, null, { crossOrigin: 'anonymous' });
+        }
+      }
+      
+      document.getElementById('selectBtn').onclick = function() { 
+        if(fabricCanvas) { 
+          fabricCanvas.isDrawingMode = false; 
+          this.classList.add('active'); 
+          document.getElementById('drawBtn').classList.remove('active'); 
+        } 
+      };
+      document.getElementById('drawBtn').onclick = function() { 
+        if(fabricCanvas) { 
+          fabricCanvas.isDrawingMode = true; 
+          this.classList.add('active'); 
+          document.getElementById('selectBtn').classList.remove('active'); 
+        } 
+      };
+      
+      setTimeout(initCanvas, 150);
+      
+      window.addEventListener('resize', function() {
+        if (!fabricCanvas) return;
+        var container = document.getElementById('canvasContainer');
+        var rect = container.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          fabricCanvas.setDimensions({ width: rect.width, height: rect.height });
+          fitCanvasViewport();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
